@@ -1,19 +1,17 @@
+import os
 import cv2
 import numpy as np
 
-# Loading YOLO scales from files and setting up the network
+# Подгружаем YOLO scales из файлом И подготавливаем сеть
 net = cv2.dnn.readNetFromDarknet("Resources/yolov4-tiny.cfg",
                                  "Resources/yolov4-tiny.weights")
 layer_names = net.getLayerNames()
 out_layers_indexes = net.getUnconnectedOutLayers()
 out_layers = [layer_names[index - 1] for index in out_layers_indexes]
 
-# Loading from a file of object classes that YOLO can detect
+# Грузим из файла объектов classes которые YOLO Может обнаружить
 with open("Resources/coco.names.txt") as file:
     classes = file.read().split("\n")
-
-# Determining classes that will be prioritized for search in an image
-# The names are in the file coco.names.txt
 
 
 classes_to_look_for = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
@@ -28,11 +26,9 @@ classes_to_look_for = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bu
  
 
 def apply_yolo_object_detection(image_to_process):
-    """
-    Recognition and determination of the coordinates of objects on the image
-    :param image_to_process: original image
-    :return: image with marked objects and captions to them
-    """
+    # Распознавание и определение координат объектов на изображении
+    # :param image_to_process: исходное изображение
+    # :return: изображение с отмеченными объектами и подписями к ним
 
     height, width, _ = image_to_process.shape
     blob = cv2.dnn.blobFromImage(image_to_process, 1 / 255, (608, 608),
@@ -42,7 +38,7 @@ def apply_yolo_object_detection(image_to_process):
     class_indexes, class_scores, boxes = ([] for i in range(3))
     objects_count = 0
 
-    # Starting a search for objects in an image
+    # Запуск поиска объектов на изображении
     for out in outs:
         for obj in out:
             scores = obj[5:]
@@ -59,14 +55,14 @@ def apply_yolo_object_detection(image_to_process):
                 class_indexes.append(class_index)
                 class_scores.append(float(class_score))
 
-    # Selection
+    # Отбор
     chosen_boxes = cv2.dnn.NMSBoxes(boxes, class_scores, 0.0, 0.4)
     for box_index in chosen_boxes:
         box_index = box_index
         box = boxes[box_index]
         class_index = class_indexes[box_index]
 
-        # For debugging, we draw objects included in the desired classes
+        # Для отладки рисуем объекты, входящие в нужные классы
         if classes[class_index] in classes_to_look_for:
             objects_count += 1
             image_to_process = draw_object_bounding_box(image_to_process,
@@ -76,13 +72,11 @@ def apply_yolo_object_detection(image_to_process):
     return final_image
 
 def draw_object_bounding_box(image_to_process, index, box):
-    """
-    Drawing object borders with captions
-    :param image_to_process: original image
-    :param index: index of object class defined with YOLO
-    :param box: coordinates of the area around the object
-    :return: image with marked objects
-    """
+    # Рисование границ объекта с надписями
+    # :param image_to_process: исходное изображение
+    # :param index: индекс класса объекта, определенного с помощью YOLO
+    # :param box: координаты области вокруг объекта
+    # :return: изображение с отмеченными объектами
 
     x, y, w, h = box
     start = (x, y)
@@ -102,12 +96,10 @@ def draw_object_bounding_box(image_to_process, index, box):
     return final_image
 
 def draw_object_count(image_to_process, objects_count):
-    """
-    Signature of the number of found objects in the image
-    :param image_to_process: original image
-    :param objects_count: the number of objects of the desired class
-    :return: image with labeled number of found objects
-    """
+    # Подпись количества найденных объектов на изображении
+    # :param image_to_process: исходное изображение
+    # :param Objects_count: количество объектов нужного класса
+    # :return: изображение с указанием количества найденных объектов
 
     start = (10, 120)
     font_size = 1.5
@@ -115,8 +107,8 @@ def draw_object_count(image_to_process, objects_count):
     width = 3
     text = "Objects found: " + str(objects_count)
 
-    # Text output with a stroke
-    # (so that it can be seen in different lighting conditions of the picture)
+    #Вывод текста штрихом
+    # (чтобы было видно при разном освещении снимка)
     white_color = (255, 255, 255)
     black_outline_color = (0, 0, 0)
     final_image = cv2.putText(image_to_process, text, start, font, font_size,
@@ -127,19 +119,18 @@ def draw_object_count(image_to_process, objects_count):
     return final_image
 
 def start_image_object_detection(img_path):
-    """
-    Image analysis
-    """
-
+    # Анализ изображений
     try:
-        # Applying Object Recognition Techniques in an Image by YOLO
+        # Применение методов распознавания объектов на изображении от YOLO
         image = cv2.imread(img_path)
         image = apply_yolo_object_detection(image)
+        filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'Resources\\test\\') + img_path.split('/')[-1]
+        cv2.imwrite(filename, image) 
 
-        # Displaying the processed image on the screen
-        cv2.imshow("Image", image)
-        if cv2.waitKey(0):
-            cv2.destroyAllWindows()
+        # Вывод обработанного изображения на экран
+        # cv2.imshow("Image", image)
+        # if cv2.waitKey(0):
+        #     cv2.destroyAllWindows()
 
     except KeyboardInterrupt:
         pass
