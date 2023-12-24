@@ -124,7 +124,7 @@ def start_image_object_detection(img_path):
         # Применение методов распознавания объектов на изображении от YOLO
         image = cv2.imread(img_path)
         image = apply_yolo_object_detection(image)
-        filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'Resources\\test\\') + img_path.split('/')[-1]
+        filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static\\result\\') + img_path.split('/')[-1]
         cv2.imwrite(filename, image) 
 
         # Вывод обработанного изображения на экран
