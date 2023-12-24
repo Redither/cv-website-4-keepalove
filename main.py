@@ -1,5 +1,8 @@
 import os
-from flask import Flask, request, render_template
+
+import detection
+
+from flask import Flask, render_template
 from flask_wtf import FlaskForm
 from wtforms import FileField, SubmitField
 from werkzeug.utils import secure_filename
@@ -12,7 +15,7 @@ application.config['UPLOAD_FOLDER'] = 'Resources/uploaded' # Указываем 
 
 # Создаем класс формы для загрузки изображений с клиента
 class UploadFileForm(FlaskForm):
-    file = FileField("File", validators=[InputRequired])
+    file = FileField("File", validators=[InputRequired()])
     submit = SubmitField("Upload File")
 
 
@@ -24,17 +27,11 @@ def hello():
     if form.validate_on_submit():
         file = form.file.data # Получаем файл впервые
         file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), application.config['UPLOAD_FOLDER'], secure_filename(file.filename)))  # Сохраняем файл
-        print('file has been uploaded')
+        print('file has been uploaded to: ' + application.config['UPLOAD_FOLDER'] + '/' + secure_filename(file.filename))
+        detection.start_image_object_detection(application.config['UPLOAD_FOLDER'] + '/' + secure_filename(file.filename))
         return 'finish'
 
     return render_template('index.html', form = form) # Рендерим страницу из шаблона, передаем в нее форму
-
-# Обработчик для эндпоинта
-@application.route('/api/detect', methods=['POST'])
-def submit_form():
-
-    # return response
-    return 
 
 # Запускаем сервер
 if __name__ == '__main__':

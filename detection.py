@@ -1,8 +1,21 @@
 import cv2
 import numpy as np
-from art import tprint
 
-# list_of_items 
+# Loading YOLO scales from files and setting up the network
+net = cv2.dnn.readNetFromDarknet("Resources/yolov4-tiny.cfg",
+                                 "Resources/yolov4-tiny.weights")
+layer_names = net.getLayerNames()
+out_layers_indexes = net.getUnconnectedOutLayers()
+out_layers = [layer_names[index - 1] for index in out_layers_indexes]
+
+# Loading from a file of object classes that YOLO can detect
+with open("Resources/coco.names.txt") as file:
+    classes = file.read().split("\n")
+
+# Determining classes that will be prioritized for search in an image
+# The names are in the file coco.names.txt
+
+
 classes_to_look_for = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
@@ -12,6 +25,7 @@ classes_to_look_for = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bu
 'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard',
 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
 'teddy bear', 'hair drier', 'toothbrush']
+ 
 
 def apply_yolo_object_detection(image_to_process):
     """
@@ -129,23 +143,3 @@ def start_image_object_detection(img_path):
 
     except KeyboardInterrupt:
         pass
-
-
-def object_detection(image):
-  	# Loading YOLO scales from files and setting up the network
-    net = cv2.dnn.readNetFromDarknet("Resources/yolov4-tiny.cfg",
-                                     "Resources/yolov4-tiny.weights")
-    layer_names = net.getLayerNames()
-    out_layers_indexes = net.getUnconnectedOutLayers()
-    out_layers = [layer_names[index - 1] for index in out_layers_indexes]
-
-    # Loading from a file of object classes that YOLO can detect
-    with open("Resources/coco.names.txt") as file:
-        classes = file.read().split("\n")
-
-    # Determining classes that will be prioritized for search in an image
-    # The names are in the file coco.names.txt
-
-    # image = input("Path to image(recapcha): ")
-
-    start_image_object_detection(image)
