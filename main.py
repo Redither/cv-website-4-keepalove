@@ -1,14 +1,33 @@
 import os
 from flask import Flask, request, render_template
-# from flask_cors import CORS
+from flask_wtf import FlaskForm
+from wtforms import FileField, SubmitField
+from werkzeug.utils import secure_filename
+from wtforms.validators import InputRequired
 
-application = Flask(__name__)
-# CORS(application) 
 
-@application.route("/")
-@application.route("/home")
+application = Flask(__name__)  # Создаем приложение фласк
+application.config['SECRET_KEY'] = 'somesecretkey' # Создаем секретный ключ для работы апи
+application.config['UPLOAD_FOLDER'] = 'Resources/uploaded' # Указываем папку для сохранения файлов из формы
+
+# Создаем класс формы для загрузки изображений с клиента
+class UploadFileForm(FlaskForm):
+    file = FileField("File", validators=[InputRequired])
+    submit = SubmitField("Upload File")
+
+
+# Создаем обработчик для корневого эндпоинта (+ домашняя страница)
+@application.route("/", methods=['GET', 'POST'])
+@application.route("/home", methods=['GET', 'POST'])
 def hello():
-    return render_template('index.html')
+    form = UploadFileForm() # Создаем образец формы
+    if form.validate_on_submit():
+        file = form.file.data # Получаем файл впервые
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), application.config['UPLOAD_FOLDER'], secure_filename(file.filename)))  # Сохраняем файл
+        print('file has been uploaded')
+        return 'finish'
+
+    return render_template('index.html', form = form) # Рендерим страницу из шаблона, передаем в нее форму
 
 # Обработчик для эндпоинта
 @application.route('/api/detect', methods=['POST'])

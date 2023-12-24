@@ -71,16 +71,19 @@
         <section>
             <div class="container">
                 <h2>Add here ur image and then I try to D373C7 some objects on it!</h2>
-                <form action="" id="service_form" enctype="multipart/form-data">
+                <form action="" id="service_form" enctype="multipart/form-data" method="post">
                     <figure>
                         <figcaption>Here result:</figcaption>
                         <img id="pic_preview" src="../Resources/test/camera.png" alt="">
                     </figure>
+                    {{form.hidden_tag()}}
                     <label for="pic_inp">
                         <span>Put here ur amazing photo:</span>
-                        <input type="file" accept="image/*" name="pic" id="pic_inp">
+                        <!-- <input type="file" accept="image/*" name="pic" id="pic_inp"> -->
+                        {{form.file()}}
                     </label>
-                    <button type="submit">START</button>
+                    <!-- <button type="submit">START</button> -->
+                    {{form.submit()}}
                 </form>
             </div>
         </section>
@@ -88,23 +91,23 @@
 </body>
 
 <script>
-    const input = document.querySelector('#pic_inp');
-    const form = document.querySelector('#service_form');
+    // const input = document.querySelector('#pic_inp');
+    // const form = document.querySelector('#service_form');
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const form = e.target;
-        const fdata = new FormData(form);
-        const data = serialize(fdata);
-        console.log(data);
-        // sendData(data)
+    // form.addEventListener('submit', (e) => {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //     const form = e.target;
+    //     const fdata = new FormData(form);
+    //     const data = serialize(fdata);
+    //     console.log(data);
+    //     // sendData(data)
 
-    });
+    // });
 
-    input.onchahge = function() {
-        document.querySelector('#pic_preview')
-    }
+    // input.onchahge = function() {
+    //     document.querySelector('#pic_preview')
+    // }
 </script>
 
 </html>
