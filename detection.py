@@ -131,7 +131,7 @@ def start_image_object_detection(img_path):
         pass
 
 
-if __name__ == '__main__':
+def object_detection(image):
   	# Loading YOLO scales from files and setting up the network
     net = cv2.dnn.readNetFromDarknet("Resources/yolov4-tiny.cfg",
                                      "Resources/yolov4-tiny.weights")
@@ -146,6 +146,6 @@ if __name__ == '__main__':
     # Determining classes that will be prioritized for search in an image
     # The names are in the file coco.names.txt
 
-    image = input("Path to image(recapcha): ")
+    # image = input("Path to image(recapcha): ")
 
     start_image_object_detection(image)
