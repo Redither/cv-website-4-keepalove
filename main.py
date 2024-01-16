@@ -19,7 +19,10 @@ application.config["SECRET_KEY"] = "somesecretkey"
 application.config["STATIC_FOLDER"] = "static"
 
 # Папка для сохранения файлов из формы
-application.config["UPLOAD_FOLDER"] = os.path.join(application.config["STATIC_FOLDER"], "uploaded")
+application.config["UPLOADED_FOLDER"] = os.path.join(application.config["STATIC_FOLDER"], "uploaded")
+
+# Папка для сохранения распознанных изображений
+application.config["RESULT_FOLDER"] = os.path.join(application.config["STATIC_FOLDER"], "result")
 
 
 # Создаем класс формы для загрузки изображений с клиента
@@ -38,20 +41,26 @@ def home() -> None:
         # Получаем файл
         file = form.file.data
 
+        # Создаём папки, если не существуют
+        if not os.path.exists(application.config["UPLOADED_FOLDER"]):
+            os.makedirs(application.config["UPLOADED_FOLDER"])
+        if not os.path.exists(application.config["RESULT_FOLDER"]):
+            os.makedirs(application.config["RESULT_FOLDER"])
+
         # Сохраняем файл
         file.save(
             os.path.join(
                 os.path.abspath(os.path.dirname(__file__)),
-                application.config["UPLOAD_FOLDER"],
+                application.config["UPLOADED_FOLDER"],
                 file.filename,
             )
         )
-        print(f"Uploaded to: {os.path.join(application.config['UPLOAD_FOLDER'], secure_filename(file.filename))}")
+        print(f"Uploaded to: {os.path.join(application.config['UPLOADED_FOLDER'], secure_filename(file.filename))}")
 
         # Запускаем процесс распознавания
-        page_img = os.path.join(application.config["STATIC_FOLDER"], "result", secure_filename(file.filename))
+        page_img = os.path.join(application.config["RESULT_FOLDER"], secure_filename(file.filename))
         detection.start_image_object_detection(
-            os.path.join(application.config["UPLOAD_FOLDER"], secure_filename(file.filename)),
+            os.path.join(application.config["UPLOADED_FOLDER"], secure_filename(file.filename)),
             page_img,
         )
 
