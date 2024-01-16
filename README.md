@@ -104,7 +104,7 @@ toothbrush
    Windows:
 
    ```shell
-   venv/Scripts/Activate.bat
+   venv\Scripts\Activate.bat
    ```
 
    Linux:
