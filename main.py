@@ -9,11 +9,18 @@ from werkzeug.utils import secure_filename
 from wtforms.validators import InputRequired
 
 
-application = Flask(__name__)  # Создаем приложение фласк
-application.config['SECRET_KEY'] = 'somesecretkey' # Создаем секретный ключ для работы апи
-application.config['UPLOAD_FOLDER'] = 'static\\uploaded' # Указываем папку для сохранения файлов из формы
+# Приложение Flask
+application = Flask(__name__)
 
-img = os.path.join('static')
+# Секретный ключ для работы апи
+application.config["SECRET_KEY"] = "somesecretkey"
+
+# Папка со всеми изображениями и шаблонами
+application.config["STATIC_FOLDER"] = "static"
+
+# Папка для сохранения файлов из формы
+application.config["UPLOAD_FOLDER"] = os.path.join(application.config["STATIC_FOLDER"], "uploaded")
+
 
 # Создаем класс формы для загрузки изображений с клиента
 class UploadFileForm(FlaskForm):
@@ -22,21 +29,39 @@ class UploadFileForm(FlaskForm):
 
 
 # Создаем обработчик для корневого эндпоинта (+ домашняя страница)
-@application.route("/", methods=['GET', 'POST'])
-@application.route("/home", methods=['GET', 'POST'])
-def hello():
-    form = UploadFileForm() # Создаем образец формы
-    page_img = os.path.join(img, 'camera.png')
+@application.route("/", methods=["GET", "POST"])
+@application.route("/home", methods=["GET", "POST"])
+def home() -> None:
+    form = UploadFileForm()  # Создаем образец формы
+    page_img = os.path.join(application.config["STATIC_FOLDER"], "camera.png")
     if form.validate_on_submit():
-        file = form.file.data # Получаем файл впервые
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), application.config['UPLOAD_FOLDER'], secure_filename(file.filename)))  # Сохраняем файл
-        print('file has been uploaded to: ' + application.config['UPLOAD_FOLDER'] + '/' + secure_filename(file.filename))
-        detection.start_image_object_detection(application.config['UPLOAD_FOLDER'] + '/' + secure_filename(file.filename))
-        page_img = os.path.join(img, 'result', secure_filename(file.filename))
-        return render_template('index.html', form = form, image = page_img) # Рендерим страницу из шаблона, передаем в нее форму
+        # Получаем файл
+        file = form.file.data
 
-    return render_template('index.html', form = form, image = page_img) # Рендерим страницу из шаблона, передаем в нее форму
+        # Сохраняем файл
+        file.save(
+            os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                application.config["UPLOAD_FOLDER"],
+                file.filename,
+            )
+        )
+        print(f"Uploaded to: {os.path.join(application.config['UPLOAD_FOLDER'], secure_filename(file.filename))}")
+
+        # Запускаем процесс распознавания
+        page_img = os.path.join(application.config["STATIC_FOLDER"], "result", secure_filename(file.filename))
+        detection.start_image_object_detection(
+            os.path.join(application.config["UPLOAD_FOLDER"], secure_filename(file.filename)),
+            page_img,
+        )
+
+        # Рендерим страницу из шаблона, передаем в нее форму
+        return render_template("index.html", form=form, image=page_img)
+
+    # Рендерим страницу из шаблона, передаем в нее форму
+    return render_template("index.html", form=form, image=page_img)
+
 
 # Запускаем сервер
-if __name__ == '__main__':
+if __name__ == "__main__":
     application.run(host="0.0.0.0", port="5000", debug=True)
